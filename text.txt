@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <complex.h>
+#include <cmath>
+#include <iostream>
+
+using namespace std;
+
+typedef struct Complex{
+    double r;
+    double i;
+}comp;
+comp pr(comp x,comp y){
+    comp rslt;
+    rslt.r=x.r*y.r-x.i*y.i;
+    rslt.i=x.r*y.i+x.i*y.r;
+    return rslt;
+}
+comp sum(comp x,comp y){
+    comp rslt;
+    rslt.r=x.r+y.r;
+    rslt.i=x.i+y.i;
+    return rslt;
+}
+comp sub(comp x,comp y){
+    comp rslt;
+    rslt.r=x.r-y.r;
+    rslt.i=x.i-y.i;
+    return rslt;
+}
+comp* FFT(comp a[],int n){
+    if(n==1)
+        return a;
+    comp* y=(comp*)malloc(n*sizeof(comp));
+    comp frstprt[n/2];
+    comp scndprt[n/2];
+    for(int i=0;i<n/2;i++)
+    {
+        frstprt[i]=a[2*i];
+        scndprt[i]=a[2*i+1];
+    }
+    comp* y2=(comp*)malloc(n/2*sizeof(comp));    
+    comp* y1=(comp*)malloc(n/2*sizeof(comp));
+    y2=FFT(frstprt,n/2);
+    y1=FFT(scndprt,n/2);
+    comp w,wn;
+    w.r=1;
+    w.i=0;
+    wn.r=cos(2*M_PI/n);
+    wn.i=sin(2*M_PI/n);
+    for(int k=0;k<(n/2);k++)
+    {
+        comp t=pr(w,y1[k]);
+        y[k]=sum(y2[k],t);
+        y[k+n/2]=sub(y2[k],t);
+        w=pr(w,wn);
+    }
+    return y;
+}
+
+int main() {
+
+    int t,n;
+    scanf("%d\n",&t);
+    for(int i=1;i<=t;i++)
+    {
+        scanf("%d\n",&n);
+        int k=0;
+        while(pow(2,k)<n)
+        {
+            k++;
+        }
+        int c=pow(2,k);
+        double x,y;
+        comp m[c];
+        for(int j=0;j<n;j++)
+        {
+            scanf("%lf %lf",&x,&y);
+            m[j].r=x;
+            m[j].i=y;
+        }
+        for(int j=n;j<c;j++)
+        {
+            m[j].r=0;
+            m[j].i=0;
+        } 
+        comp* res=FFT(m,c);
+        for(int j=0;j<c;j++)
+            printf("(%0.3lf,%0.3lf)\n",res[j].r,res[j].i);
+    }
+    return 0;
+}
